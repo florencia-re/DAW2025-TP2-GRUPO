@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'sales' => [
+        'base_url' => env('SALES_API_BASE_URL'),
+        'jwt' => env('SALES_API_JWT'),
+    ],
+
+
 ];
