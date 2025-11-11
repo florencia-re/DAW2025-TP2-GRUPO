@@ -1,0 +1,94 @@
+
+services: 
+  app:
+    image: "laravel/app:${TAG:-latest}"
+    build:
+      args:
+        user: testuser
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    container_name: daw_tp2_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-dawtp2}
+      DB_USERNAME: ${DB_USERNAME:-user1}
+      DB_PASSWORD: ${DB_PASSWORD:-1234}
+      REDIS_HOST: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - laravel-networks
+
+  web:
+    image: nginx:alpine
+    container_name: daw_tp2_web
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    depends_on:
+      - app
+    networks:
+      - laravel-networks  
+
+  db:
+    image: mysql:8.0
+    container_name: daw_tp2_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-dawtp2}
+      MYSQL_USER: ${DB_USERNAME:-user1}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-1234}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-1234}
+    ports:
+      - 3310:3306
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - laravel-networks
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-1234}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: daw_tp2_phpmyadmin
+    restart: always
+    ports:
+       - 8082:80
+    environment:
+        PMA_ARBITRARY: 1
+        PMA_HOST: db
+        PMA_USER: ${DB_USERNAME:-user1}
+        PMA_PASSWORD: ${DB_PASSWORD:-1234}
+    depends_on:
+      - db
+    networks:
+        - laravel-networks
+
+  redis:
+    image: redis:alpine
+    container_name: daw_tp2_redis
+    networks:
+      - laravel-networks
+
+networks:
+  laravel-networks:
+    driver: bridge
+
+volumes:
+  dbdata:

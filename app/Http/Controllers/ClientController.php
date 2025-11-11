@@ -124,20 +124,4 @@ class ClientController extends Controller
             return back()->with('error', 'Error al eliminar permanentemente el cliente: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Muestra las ventas externas del cliente especificado. (Requisito TP)
-     */
-    public function sales(int $id)
-    {
-        $client = $this->clientService->findClient($id) ?? Client::withTrashed()->findOrFail($id);
-
-        // Llama al servicio para obtener la simulación de ventas
-        $result = $this->clientService->getClientSales($client->id);
-
-        $sales = $result['sales'];
-        $status = $result['status'];
-
-        return view('clients.sales', compact('client', 'sales', 'status'));
-    }
 }
