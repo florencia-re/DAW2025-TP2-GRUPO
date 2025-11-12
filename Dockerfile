@@ -1,48 +1,61 @@
-FROM php:8.2-fpm 
+FROM node:20 AS frontend-builder
 
-# Arguments defined in docker-compose.yml
-ARG user
-ARG uid
+ARG MODE=production # Por defecto prod; pasa --build-arg MODE=development para dev
 
-# Install system dependencies
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+COPY . .
+#Condicional build para prod, nada para dev
+RUN if [ "$MODE" = "production" ]; then npm run build; fi
+
+
+# Usamos una imagen base de PHP con Apache (versión compatible con Laravel)
+FROM php:8.2-apache
+
+#Instalamos dependencias del sistema necesarias para Laravel
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
     libpng-dev \
-    libonig-dev \
-    libxml2-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     zip \
     unzip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    git \ 
+    default-mysql-client \
+    libicu-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_mysql mysqli exif pcntl bcmath intl \
+    && a2enmod rewrite
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Instalamos Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Get latest Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+#Directorio de trabajo
+WORKDIR /var/www/html
 
-# Install Node.js 20.x (LTS)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Configurar VirtualHost de Apache para Laravel
+COPY apache-laravel.conf /etc/apache2/sites-available/000-default.conf
 
-# Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
+# Copiamos el codigo de la app al contenedor
+COPY . . 
 
-# Set working directory
-WORKDIR /var/www
+COPY --from=frontend-builder /app/public/build /var/www/html/public/build
 
-# Copy entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+#Instalamos las dependencias de Composer
+RUN composer install --optimize-autoloader --no-dev
 
-# Switch to non-root user
-USER $user
+#Generamos la clave de app de Laravel y configuramos permisos
+RUN php artisan key:generate
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Set entrypoint
-ENTRYPOINT ["docker-entrypoint.sh"]
+#Exponemos el puerto 80 para el servidor web
+EXPOSE 80
 
-# Default command
-CMD ["php-fpm"]
+#Copiando y configurando entrypoint
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["apache2-foreground"]

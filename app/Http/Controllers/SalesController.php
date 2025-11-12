@@ -2,28 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Services\ClientService;
+
 
 class SalesController extends Controller
 {
-    protected $clientService;
+    protected $ventasService;
 
-    public function __construct(ClientService $clientService)
+    public function __construct(\App\Services\VentasService $ventasService)
     {
-        $this->clientService = $clientService;
+        $this->ventasService = $ventasService;
     }
 
-    public function sales(int $id)
+    public function listarVentas($clientId, $userName, $password)
     {
-        $client = $this->clientService->findClient($id) ?? Client::withTrashed()->findOrFail($id);
-
-        // Llama al servicio para obtener la simulación de ventas
-        $result = $this->clientService->getClientSales($client->id);
-
-        $sales = $result['sales'];
-        $status = $result['status'];
-
-        return view('clients.sales', compact('client', 'sales', 'status'));
+        $ventas = $this->ventasService->listarVentas($clientId, $userName, $password);
+        if (!$ventas) {
+            return redirect()->back()->with('error', 'Cliente no encontrado o sin ventas.');
+        }
+        return view('sales.index', compact('ventas'));
     }
 }

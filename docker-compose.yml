@@ -1,94 +1,75 @@
 
-services: 
-  app:
-    image: "laravel/app:${TAG:-latest}"
-    build:
-      args:
-        user: testuser
-        uid: 1000
-      context: ./
-      dockerfile: Dockerfile
-    container_name: daw_tp2_app
-    restart: unless-stopped
-    working_dir: /var/www
-    volumes:
-      - ./:/var/www
-    environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-dawtp2}
-      DB_USERNAME: ${DB_USERNAME:-user1}
-      DB_PASSWORD: ${DB_PASSWORD:-1234}
-      REDIS_HOST: redis
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    networks:
-      - laravel-networks
-
+services:
   web:
-    image: nginx:alpine
-    container_name: daw_tp2_web
+    build: 
+      context: .
+    container_name: laravel-app
     restart: unless-stopped
     ports:
-      - 8000:80
+      - "8000:80"
     volumes:
-      - ./:/var/www
-      - ./docker-compose/nginx:/etc/nginx/conf.d/
+      - .:/var/www/html
     depends_on:
-      - app
-    networks:
-      - laravel-networks  
+      db: 
+        condition: service_healthy
+    environment:
+      - APP_ENV=localhost
+      - APP_DEBUG=true
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=dawtp2
+      - DB_USERNAME=root
+      - DB_PASSWORD=1234
 
   db:
     image: mysql:8.0
-    container_name: daw_tp2_mysql
+    container_name: laravel-db
     restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-dawtp2}
-      MYSQL_USER: ${DB_USERNAME:-user1}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-1234}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-1234}
     ports:
-      - 3310:3306
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: dawtp2
+      MYSQL_ROOT_PASSWORD: 1234
     volumes:
-      - dbdata:/var/lib/mysql
-    networks:
-      - laravel-networks
+      - db-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-1234}"]
-      interval: 5s
-      timeout: 3s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 3s
+      timeout: 2s
       retries: 10
-      start_period: 30s
+      start_period: 10s
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: daw_tp2_phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: laravel-phpmyadmin
     restart: always
     ports:
-       - 8082:80
+      - "8080:80"
     environment:
-        PMA_ARBITRARY: 1
-        PMA_HOST: db
-        PMA_USER: ${DB_USERNAME:-user1}
-        PMA_PASSWORD: ${DB_PASSWORD:-1234}
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: 1234
+      UPLOAD_LIMIT: 300M
     depends_on:
       - db
-    networks:
-        - laravel-networks
 
-  redis:
-    image: redis:alpine
-    container_name: daw_tp2_redis
-    networks:
-      - laravel-networks
-
-networks:
-  laravel-networks:
-    driver: bridge
+  frontend-dev:
+    image: node:20
+    container_name: laravel-frontend-dev
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: npm run dev
+    ports:
+      - "5173:5173"
+    depends_on:
+      - web
+    environment:
+      - VITE_APP_URL=http://localhost:8000
 
 volumes:
-  dbdata:
+  db-data:
+ 
+
+ 
