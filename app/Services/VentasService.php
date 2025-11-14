@@ -2,44 +2,54 @@
 
 namespace App\Services;
 
+use App\Repositories\Contracts\SalesRepositoryInterface;
+use App\Services\UserService;
 use App\Services\ClientService;
 use Illuminate\Support\Facades\Http;
 
 class VentasService
 {
-    protected $clientService;
-    protected $userService;
+
 
     // Inyección de dependencia del servicio
-    public function __construct(ClientService $clientService, UserService $userService)
-    {
-        $this->clientService = $clientService;
-        $this->userService = $userService;
-    }
+    public function __construct(protected ClientService $clientService, protected UserService $userService, protected SalesRepositoryInterface $salesRepository) {}
 
-    public function listarVentasPorCuit($clientId, $token)
+    public function listSalesByCuit($token, $clientCuit)
     {
-        // Ejemplo de uso del servicio de clientes dentro del servicio de ventas
-        $cliente = $this->clientService->findClient($clientId);
-        if (!$cliente) {
-            return null;
-        } else {
-            $clienteCuit = $cliente->cuit;
-            $ventas = $this->fetchApi($clienteCuit, $token);
-            return $ventas;
-        }
-    }
 
-    public function fetchApi($cuit, $token)
-    {
-        //http://localhost/daw2025/TP/Public/ventas
-        $response = Http::withToken($token)->get('http://localhost/daw2025/TP/Public/ventas');
-        $data = $response->json();
+        $listSales = $this->listSales($token, $clientCuit);
 
-        $ventasCliente = array_filter($data, function ($venta) use ($cuit) {
-            return $venta['cuit_cliente'] === $cuit;
+        $clientSales = array_filter($listSales, function ($sale) use ($clientCuit) {
+            return $sale['cuit_client'] == $clientCuit;  // Ajusta según estructura
         });
 
-        return $ventasCliente;
+        return $clientSales;
+    }
+
+
+    public function listSales($token)
+    {
+        $token = $this->validateApiCall($token);
+
+        if (!$token) {
+            return null; // Autenticación fallida
+        }
+        $listSales = $this->salesRepository->getAll(10, $token);
+
+        return $listSales;
+    }
+
+    public function validateApiCall($token)
+    {
+        $response = Http::post('http://localhost/daw2025/TP/Public/login', [
+            'token' => $token
+        ]);
+
+        if ($response->successful()) {
+            $token = $response->json()['token'] ?? null;
+            return $token;
+        }
+
+        return null;
     }
 }

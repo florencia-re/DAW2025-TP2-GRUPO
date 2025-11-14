@@ -3,44 +3,38 @@
 namespace App\Repositories;
 
 use App\Models\Client;
+use App\Repositories\Contracts\ClientRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class ClientRepository
+class ClientRepository implements ClientRepositoryInterface
 {
-    /**
-     * @var Client
-     */
-    protected $model;
 
     // Inyección del modelo Eloquent
-    public function __construct(Client $model)
-    {
-        $this->model = $model;
-    }
+    public function __construct(protected Client $clientModel) {}
 
 
     public function all(int $perPage = 10): LengthAwarePaginator
     {
         // Usamos paginate() para soportar el método links() en la vista
-        return $this->model->paginate($perPage);
+        return $this->clientModel->paginate($perPage);
     }
 
 
     public function find(int $id)
     {
-        return $this->model->find($id);
+        return $this->clientModel->find($id);
     }
 
 
     public function create(array $data)
     {
-        return $this->model->create($data);
+        return $this->clientModel->create($data);
     }
 
 
     public function update(int $id, array $data)
     {
-        $client = $this->model->find($id);
+        $client = $this->clientModel->find($id);
         if ($client) {
             $client->update($data);
             return $client;
@@ -51,22 +45,22 @@ class ClientRepository
 
     public function delete(int $id): bool
     {
-        return $this->model->destroy($id); // destroy realiza soft delete si el modelo usa la trait
+        return $this->clientModel->destroy($id); // destroy realiza soft delete si el modelo usa la trait
     }
 
     // --- Métodos de Soft Delete / Papelera ---
 
 
-    public function     getDeleted(int $perPage = 10): LengthAwarePaginator
+    public function getDeleted(int $perPage = 10): LengthAwarePaginator
     {
 
-        return $this->model->onlyTrashed()->paginate($perPage);
+        return $this->clientModel->onlyTrashed()->paginate($perPage);
     }
 
     //restaurar cliente
     public function restore(int $id): bool
     {
-        $client = $this->model->withTrashed()->find($id);
+        $client = $this->clientModel->withTrashed()->find($id);
         if ($client && $client->trashed()) {
             return $client->restore();
         }
@@ -77,7 +71,7 @@ class ClientRepository
     public function forceDelete(int $id): bool
     {
         // encontrar el cliente que está en la papelera
-        $client = $this->model->onlyTrashed()->find($id);
+        $client = $this->clientModel->onlyTrashed()->find($id);
 
         if ($client) {
 

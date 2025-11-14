@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SalesController;
 
 
 // Home -> clients
@@ -33,23 +34,26 @@ Route::middleware(['auth'])->group(function () {
     // ---------------------------------------------
 
     Route::resource('clients', ClientController::class)
-        ->except(['show']) // El método show lo definimos a continuación para evitar conflictos
+        ->except(['show'])
         ->middleware(['auth']); // Middleware ya aplicado al grupo, pero se puede duplicar aquí si se desea
 
 
-     //Muestra la lista de clientes eliminados: GET /clients/archived
+    //Muestra la lista de clientes eliminados: GET /clients/archived
     Route::get('clients/archived', [ClientController::class, 'archived'])->name('clients.archived');
 
-     //Ruta para Restaurar un Cliente (Miembro)
+    //Ruta para Restaurar un Cliente (Miembro)
     Route::put('clients/restore/{id}', [ClientController::class, 'restore'])
         ->name('clients.restore')
         ->where('id', '[0-9]+'); // Se asegura que {id} es un número
 
     // Ruta para Ver Ventas Externas
     Route::get('clients/{client}/sales', [ClientController::class, 'sales'])->name('clients.sales');
-
 });
 
+// CRUD de usuarios
+Route::resource('users', UserController::class);
+
+Route::get('sales/listSalesByCuit/{cuit}', [SalesController::class, 'listSalesByCuit'])->name('sales.listSalesByCuit');
 
 // Mantiene funcionando rutas de autenticación (login, registro, logout) de Breeze
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

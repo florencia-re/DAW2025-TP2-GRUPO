@@ -3,8 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Services\ClientService;
+use App\Repositories\Contracts\ClientRepositoryInterface;
 use App\Repositories\ClientRepository;
+use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\UserRepository;
+use App\Repositories\Contracts\SalesRepositoryInterface;
+use App\Repositories\SalesRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,16 +23,19 @@ class AppServiceProvider extends ServiceProvider
 
         // Registrar el Repositorio (Clase concreta a la Interfaz)
         $this->app->bind(
-            ClientRepository::class, // Cambiado para usar la clase concreta directamente
+            ClientRepositoryInterface::class,
             ClientRepository::class
         );
 
-        // Registrar el Servicio (Clase concreta a la Interfaz)
+        // Registrar el Repositorio (Clase concreta a la Interfaz)
         $this->app->bind(
-            ClientService::class, // Cambiado para usar la clase concreta directamente
-            ClientService::class
+            UserRepositoryInterface::class,
+            UserRepository::class
         );
-        // ----------------------------------------------------
+        $this->app->bind(
+            SalesRepositoryInterface::class,
+            SalesRepository::class
+        );
     }
 
     /**

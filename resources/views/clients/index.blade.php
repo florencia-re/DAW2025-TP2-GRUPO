@@ -58,7 +58,7 @@
                             <a href="{{ route('clients.edit', $c->id) }}" class="text-yellow-600 hover:text-yellow-900 font-semibold text-xs">Editar</a>
 
                             {{-- Botón para Ver Ventas --}}
-                            <a href="{{ route('clients.sales', $c->id) }}" class="text-purple-600 hover:text-purple-900 font-semibold text-xs">
+                            <a href="{{ route('sales.listSalesByCuit', $c->cuit) }}" class="text-purple-600 hover:text-purple-900 font-semibold text-xs">
                                 Ventas
                             </a>
 

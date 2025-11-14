@@ -2,26 +2,18 @@
 
 namespace App\Services;
 
-use App\Repositories\ClientRepository;
+
 use App\Models\Client;
-use Illuminate\Support\Facades\Http;
+use App\Repositories\Contracts\ClientRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ClientService
 {
-    /**
-     * @var ClientRepository
-     */
-    protected $clientRepository;
 
-    /**
-     * Inyección de dependencia del Repositorio
-     *
-     * @param ClientRepository $clientRepository
-     */
-    public function __construct(ClientRepository $clientRepository)
+
+    public function __construct(protected ClientRepositoryInterface $client)
     {
-        $this->clientRepository = $clientRepository;
+        $this->client = $client;
     }
 
     // --- MÉTODOS CRUD (INTERFAZ DE REPOSITORIO) ---
@@ -35,7 +27,7 @@ class ClientService
     public function getAllClients(int $perPage = 10): LengthAwarePaginator
     {
         // El repositorio debe usar ->paginate($perPage)
-        return $this->clientRepository->all($perPage);
+        return $this->client->all($perPage);
     }
 
     /**
@@ -46,7 +38,7 @@ class ClientService
     public function getArchivedClients(int $perPage = 10): LengthAwarePaginator
     {
         // CORREGIDO: Llamamos a un método que debe devolver un Paginator
-        return $this->clientRepository->getDeleted($perPage);
+        return $this->client->getDeleted($perPage);
     }
 
     /**
@@ -57,7 +49,7 @@ class ClientService
      */
     public function findClient(int $id): ?Client
     {
-        return $this->clientRepository->find($id);
+        return $this->client->find($id);
     }
 
     /**
@@ -68,7 +60,7 @@ class ClientService
      */
     public function createClient(array $data): Client
     {
-        return $this->clientRepository->create($data);
+        return $this->client->create($data);
     }
 
     /**
@@ -80,7 +72,7 @@ class ClientService
      */
     public function updateClient(int $id, array $data): ?Client
     {
-        return $this->clientRepository->update($id, $data);
+        return $this->client->update($id, $data);
     }
 
     /**
@@ -91,7 +83,7 @@ class ClientService
      */
     public function deleteClient(int $id): bool
     {
-        return $this->clientRepository->delete($id);
+        return $this->client->delete($id);
     }
 
     /**
@@ -102,7 +94,7 @@ class ClientService
      */
     public function restoreClient(int $id): bool
     {
-        return $this->clientRepository->restore($id);
+        return $this->client->restore($id);
     }
 
     /**
@@ -114,7 +106,7 @@ class ClientService
     public function forceDeleteClient(int $id): bool
     {
         // NUEVO: Llama al repositorio para la eliminación permanente
-        return $this->clientRepository->forceDelete($id);
+        return $this->client->forceDelete($id);
     }
 
     // --- LÓGICA DE NEGOCIO ESPECIAL: VENTAS EXTERNAS ---
@@ -126,8 +118,4 @@ class ClientService
      * @param int $clientId
      * @return array Contiene 'sales' (array de ventas) y 'status' (resultado de la operación).
      */
-    public function getClientSales(int $clientId): array
-    {
-        return "ventas";
-    }
 }

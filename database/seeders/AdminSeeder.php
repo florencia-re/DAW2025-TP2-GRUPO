@@ -15,11 +15,13 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::create([
-        'name' => 'Admin',
-        'email' => 'admin@example.com',
-        'password' => bcrypt('admin123'),
-        'role' => 'Administrador',
-    ]);
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'], // ← Busca SOLO por email
+            [
+                'name' => 'Admin',
+                'password' => bcrypt('admin123'),
+                'role' => 'Administrador',
+            ]
+        );
     }
 }
