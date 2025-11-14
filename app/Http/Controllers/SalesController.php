@@ -4,36 +4,45 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestSalesController;
 use App\Services\VentasService;
-
+use App\Models\Client;
+use Illuminate\Support\Facades\Log;
 
 class SalesController extends Controller
 {
-
-
     public function __construct(protected VentasService $ventasService) {}
-
 
     public function listSalesByCuit(RequestSalesController $request)
     {
         $clientCuit = $request->validated('cuit');
 
-        $token = session('external_api_token');
-
-        dd([
-            'token' => $token,
-            'tiene_token' => !is_null($token),
-            'longitud' => $token ? strlen($token) : 0
+        // DEBUG: Ver estado de sesión
+        Log::info('Estado de sesión al solicitar ventas', [
+            'authenticated' => session('external_api_authenticated'),
+            'has_cookies' => !empty(session('external_api_cookies')),
+            'cookies' => session('external_api_cookies'),
+            'cuit_solicitado' => $clientCuit
         ]);
-        // Verificar que hay token
-        if (!$token) {
-            return redirect()->back()
-                ->with('error', 'No estás autenticado en el sistema de ventas. Por favor, cierra sesión y vuelve a iniciar.');
+
+        // Verificar autenticación con API externa
+        if (!session('external_api_authenticated')) {
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión para acceder a las ventas.');
         }
 
-        $ventas = $this->ventasService->listSales($token, $clientCuit);
-        if (!$ventas) {
+        // Obtener ventas del servicio
+        $sales = $this->ventasService->listSalesByCuit($clientCuit);
+
+        Log::info('Resultado de listSalesByCuit', [
+            'total_ventas' => count($sales),
+            'ventas' => $sales
+        ]);
+
+        if (empty($sales)) {
             return redirect()->back()->with('error', 'Cliente sin ventas.');
         }
-        return view('sales.index', compact('ventas'));
+
+        $client = Client::where('cuit', $clientCuit)->firstOrFail();
+
+        return view('sales.index', compact('client', 'sales'));
     }
 }

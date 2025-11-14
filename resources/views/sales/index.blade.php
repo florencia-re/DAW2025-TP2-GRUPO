@@ -18,9 +18,9 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                 @foreach ($sales as $sale)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $sale->cuitClient }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $sale->date->format('d/m/Y') }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${{ number_format($sale->price, 2) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $sale['cuitClient'] ?? 'NO EXISTE' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $sale['date'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${{ number_format($sale['price'], 2) }}</td>
                     </tr>
                 @endforeach
                 </tbody>
