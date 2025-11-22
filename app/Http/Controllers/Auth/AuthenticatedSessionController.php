@@ -14,8 +14,7 @@ use GuzzleHttp\Cookie\CookieJar;
 
 class AuthenticatedSessionController extends Controller
 {
-
-
+    protected $baseUrl = 'http://localhost/daw-2025-main/daw-2025-main/Public';
     public function create(): View
     {
         return view('auth.login');
@@ -26,9 +25,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-
         $request->authenticate();
-
         $request->session()->regenerate();
         $user = Auth::user();
         // Autenticarse en la API externa
@@ -50,7 +47,7 @@ class AuthenticatedSessionController extends Controller
             $cookies = new CookieJar();
             $response = Http::withOptions(['cookies' => $cookies])
                 ->asJson()
-                ->post('http://localhost/daw2025/TP/Public/login', [
+                ->post("{$this->baseUrl}/login", [
                     'nombre_usuario' => $userName,
                     'contrasena' => $password
                 ]);

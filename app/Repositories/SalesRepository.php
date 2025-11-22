@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class SalesRepository implements SalesRepositoryInterface
 {
-    protected $baseUrl = 'http://localhost/daw2025/TP/Public';
-
+    protected $baseUrl = 'http://localhost/daw-2025-main/daw-2025-main/Public';
 
     public function __construct(protected Sales $sales) {}
 

@@ -5,13 +5,10 @@ namespace App\Services;
 use App\Repositories\Contracts\SalesRepositoryInterface;
 use App\Services\UserService;
 use App\Services\ClientService;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class VentasService
 {
-
-
     // Inyección de dependencia del servicio
     public function __construct(protected ClientService $clientService, protected UserService $userService, protected SalesRepositoryInterface $salesRepository) {}
 
@@ -47,7 +44,6 @@ class VentasService
 
         return array_values($clientSales);
     }
-
 
     public function listSales()
     {
