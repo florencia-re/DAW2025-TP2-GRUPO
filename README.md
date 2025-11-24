@@ -63,9 +63,7 @@ Los enlaces se configuran en app/Providers/AppServiceProvider.php permitiendo el
 
 ## 3. Flujo de datos de ventas
 
-El flujo más crítico del sistema implica la recuperación de datos de ventas de la API externa:
-
-Diagrama: Secuencia de recuperación de datos de ventas
+El flujo más crítico del sistema implica la recuperación de datos de ventas de la API externa.
 
 Detalles de implementación:
 
@@ -75,9 +73,7 @@ Detalles de implementación:
 
 ## 4. Modelo de autenticación
 
-El sistema implementa un patrón de autenticación dual:
-
-Diagrama: Modelo de autenticación de tres estados
+El sistema implementa un patrón de autenticación dual.
 
 Claves de sesión gestionadas:
     - external_api_cookies: Matriz de cookies de API externas almacenadas en app/Http/Controllers/Auth/AuthExternalSessionController.php
