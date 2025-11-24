@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class AuthExternalSessionController extends Controller
 {
 
-    protected $baseUrl = 'http://localhost/daw-2025-main/daw-2025-main/Public';
+    protected $baseUrl = 'http://localhost/daw2025/TP/Public';
      /**
      * Autenticarse en la API externa y guardar el token
      */
