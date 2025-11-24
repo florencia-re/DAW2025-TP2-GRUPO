@@ -27,7 +27,7 @@ class UserService
      */
     public function createUser(array $data)
     {
-        $baseUrl = 'http://localhost/daw-2025-main/daw-2025-main/Public/usuarios';
+        $baseUrl = 'http://localhost/daw2025/TP/Public/usuarios';
 
         Http::post($baseUrl, [
             'nombre_usuario' => $data['name'],
