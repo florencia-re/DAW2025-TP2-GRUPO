@@ -2,7 +2,7 @@
 Trabajo Práctico Final de la materia "Desarrollo de Aplicaciones Web" perteneciente a la Tecnicatura Universitaria en Tecnologías de la Información UTN Santa Fe
 
 ## 1. Visión General
-Sistema de gestión de ventas y clientes desarrollado en PHP con Laravel, conectando con API externa para la recuperación de los datos de ventas a los distintos usuarios. La aplicación implementa una arquitectura en capas con una clara separación entre los controladores HTTP, la lógica del servicio y el acceso a los datos.
+Sistema de gestión de ventas y clientes desarrollado en PHP con Laravel, conectando con API externa para la recuperación de los datos de ventas de los distintos usuarios. La aplicación implementa una arquitectura en capas con una clara separación entre los controladores HTTP, la lógica del servicio y el acceso a los datos.
 
 ### 1.1 Propósito del sistema
 La aplicación sirve como interfaz de gestión para tres entidades principales:
