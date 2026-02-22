@@ -1,4 +1,5 @@
-# Documentación Trabajo Práctico 2 - DAW 2025
+# Documentación 
+#DAW 2025 - Tecnicatura Universitaria en Tecnologpias de la Información
 
 ## 1. Visión General
 Sistema de gestión de ventas y clientes creado con Laravel que se integra con una API externa para la recuperación de datos de los datos de las ventas a los distintos usuarios. La aplicación implementa una arquitectura en capas con una clara separación entre los controladores HTTP, la lógica del servicio y el acceso a los datos.
